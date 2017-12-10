@@ -275,3 +275,22 @@ func GetRootPath(o dhcp4.Options) (string, error) {
 func GetExtensionsPath(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionExtensionsPath, o)
 }
+
+type OptionCodes []dhcp4.OptionCode
+
+func (o OptionCodes) MarshalBinary() ([]byte, error) {
+	b := util.NewBuffer(nil)
+	for _, code := range o {
+		b.Write8(uint8(code))
+	}
+	return b.Data(), nil
+}
+
+func (o *OptionCodes) UnmarshalBinary(p []byte) error {
+	b := util.NewBuffer(p)
+	*o = make(OptionCodes, 0, b.Len())
+	for b.Len() > 0 {
+		*o = append(*o, dhcp4.OptionCode(b.Read8()))
+	}
+	return nil
+}

@@ -147,11 +147,19 @@ func (p *Packet) UnmarshalBinary(q []byte) error {
 
 	var sname [64]byte
 	b.ReadBytes(sname[:])
-	p.ServerName = string(sname[:strings.Index(string(sname[:]), "\x00")])
+	length := strings.Index(string(sname[:]), "\x00")
+	if length == -1 {
+		length = 64
+	}
+	p.ServerName = string(sname[:length])
 
 	var file [128]byte
 	b.ReadBytes(file[:])
-	p.BootFile = string(file[:strings.Index(string(file[:]), "\x00")])
+	length = strings.Index(string(file[:]), "\x00")
+	if length == -1 {
+		length = 128
+	}
+	p.BootFile = string(file[:length])
 
 	// Read the cookie and then fucking ignore it.
 	var cookie [4]byte
