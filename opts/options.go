@@ -307,3 +307,29 @@ func GetParameterRequestList(o dhcp4.Options) (OptionCodes, error) {
 	var oc OptionCodes
 	return oc, (&oc).UnmarshalBinary(v)
 }
+
+type Uint16 uint16
+
+func (u Uint16) MarshalBinary() ([]byte, error) {
+	b := util.NewBuffer(nil)
+	b.Write16(uint16(u))
+	return b.Data(), nil
+}
+
+func (u *Uint16) UnmarshalBinary(p []byte) error {
+	b := util.NewBuffer(p)
+	if b.Len() < 2 {
+		return io.ErrUnexpectedEOF
+	}
+	*u = Uint16(b.Read16())
+	return nil
+}
+
+func GetMaximumDHCPMessageSize(o dhcp4.Options) (uint16, error) {
+	v, err := o.Get(dhcp4.OptionMaximumDHCPMessageSize)
+	if err != nil {
+		return 0, err
+	}
+	var u Uint16
+	return uint16(u), (&u).UnmarshalBinary(v)
+}

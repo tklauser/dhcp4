@@ -113,7 +113,7 @@ func (c *Client) discoverPacket() *dhcp4.Packet {
 	packet.Broadcast = true
 
 	packet.Options.Add(dhcp4.OptionDHCPMessageType, opts.DHCPDiscover)
-	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, maxMessageSize)
+	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, opts.Uint16(maxMessageSize))
 	return packet
 }
 
@@ -127,7 +127,7 @@ func (c *Client) requestPacket(reply *dhcp4.Packet) *dhcp4.Packet {
 	packet.Broadcast = true
 
 	packet.Options.Add(dhcp4.OptionDHCPMessageType, opts.DHCPRequest)
-	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, maxMessageSize)
+	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, opts.Uint16(maxMessageSize))
 	// Request the offered IP address.
 	packet.Options.Add(dhcp4.OptionRequestedIPAddress, opts.IP(reply.YIAddr))
 
