@@ -1,5 +1,8 @@
 package dhcp4
 
+// OpCode is the BOOTP message type as defined by RFC 2131, Section 2.
+//
+// Note that the DHCP message type is embedded via OptionDHCPMessageType.
 type OpCode uint8
 
 const (
@@ -9,7 +12,7 @@ const (
 
 type OptionCode uint8
 
-// Option codes defined by RFC 1533. (Incomplete)
+// Option codes defined by RFC 2132. (Incomplete)
 const (
 	End                                              OptionCode = 255
 	Pad                                              OptionCode = 0

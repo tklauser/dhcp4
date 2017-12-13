@@ -1,3 +1,6 @@
+// opts implements Options parsing for DHCPv4 options as described in RFC 2132.
+//
+// Not all options are currently implemented.
 package opts
 
 import (
@@ -8,7 +11,6 @@ import (
 	"github.com/u-root/dhcp4/util"
 )
 
-// RFC 1533, Section 3.3.
 type SubnetMask net.IPMask
 
 func (s SubnetMask) MarshalBinary() ([]byte, error) {
@@ -25,6 +27,7 @@ func (s *SubnetMask) UnmarshalBinary(p []byte) error {
 	return nil
 }
 
+// RFC 2132, Section 3.3.
 func GetSubnetMask(o dhcp4.Options) (SubnetMask, error) {
 	v, err := o.Get(dhcp4.OptionSubnetMask)
 	if err != nil {
@@ -34,7 +37,6 @@ func GetSubnetMask(o dhcp4.Options) (SubnetMask, error) {
 	return s, (&s).UnmarshalBinary(v)
 }
 
-// RFC 1533, Section 9.4.
 type DHCPMessageType uint8
 
 const (
@@ -61,6 +63,7 @@ func (d *DHCPMessageType) UnmarshalBinary(p []byte) error {
 	return nil
 }
 
+// RFC 2132, Section 9.4.
 func GetDHCPMessageType(o dhcp4.Options) (DHCPMessageType, error) {
 	v, err := o.Get(dhcp4.OptionDHCPMessageType)
 	if err != nil {
@@ -96,27 +99,27 @@ func GetIP(code dhcp4.OptionCode, o dhcp4.Options) (IP, error) {
 	return ip, (&ip).UnmarshalBinary(v)
 }
 
-// RFC 1533, Section 3.18.
+// RFC 2132, Section 3.18.
 func GetSwapServer(o dhcp4.Options) (IP, error) {
 	return GetIP(dhcp4.OptionSwapServer, o)
 }
 
-// RFC 1533, Section 5.3.
+// RFC 2132, Section 5.3.
 func GetBroadcastAddress(o dhcp4.Options) (IP, error) {
 	return GetIP(dhcp4.OptionBroadcastAddress, o)
 }
 
-// RFC 1533, Section 5.7.
+// RFC 2132, Section 5.7.
 func GetRouterSolicitationAddress(o dhcp4.Options) (IP, error) {
 	return GetIP(dhcp4.OptionRouterSolicitationAddress, o)
 }
 
-// RFC 1533, Section 9.1.
+// RFC 2132, Section 9.1.
 func GetRequestedIPAddress(o dhcp4.Options) (IP, error) {
 	return GetIP(dhcp4.OptionRequestedIPAddress, o)
 }
 
-// RFC 1533, Section 9.5.
+// RFC 2132, Section 9.5.
 func GetServerIdentifier(o dhcp4.Options) (IP, error) {
 	return GetIP(dhcp4.OptionServerIdentifier, o)
 }
@@ -156,77 +159,77 @@ func GetIPs(code dhcp4.OptionCode, o dhcp4.Options) (IPs, error) {
 	return i, (&i).UnmarshalBinary(v)
 }
 
-// RFC 1533, Section 3.5.
+// RFC 2132, Section 3.5.
 func GetRouters(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionRouters, o)
 }
 
-// RFC 1533, Section 3.6.
+// RFC 2132, Section 3.6.
 func GetTimeServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionTimeServers, o)
 }
 
-// RFC 1533, Section 3.7.
+// RFC 2132, Section 3.7.
 func GetNameServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionNameServers, o)
 }
 
-// RFC 1533, Section 3.8.
+// RFC 2132, Section 3.8.
 func GetDomainNameServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionDomainNameServers, o)
 }
 
-// RFC 1533, Section 3.9.
+// RFC 2132, Section 3.9.
 func GetLogServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionLogServers, o)
 }
 
-// RFC 1533, Section 3.10.
+// RFC 2132, Section 3.10.
 func GetCookieServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionCookieServers, o)
 }
 
-// RFC 1533, Section 3.11.
+// RFC 2132, Section 3.11.
 func GetLPRServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionLPRServers, o)
 }
 
-// RFC 1533, Section 3.12.
+// RFC 2132, Section 3.12.
 func GetImpressServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionImpressServers, o)
 }
 
-// RFC 1533, Section 3.13.
+// RFC 2132, Section 3.13.
 func GetResourceLocationServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionResourceLocationServers, o)
 }
 
-// RFC 1533, Section 8.2.
+// RFC 2132, Section 8.2.
 func GetNetworkInformationServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionNetworkInformationServers, o)
 }
 
-// RFC 1533, Section 8.3.
+// RFC 2132, Section 8.3.
 func GetNetworkTimeProtocolServers(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionNetworkTimeProtocolServers, o)
 }
 
-// RFC 1533, Section 8.5.
+// RFC 2132, Section 8.5.
 func GetNetBIOSOverTCPIPNameServer(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionNetBIOSOverTCPIPNameServer, o)
 }
 
-// RFC 1533, Section 8.6.
+// RFC 2132, Section 8.6.
 func GetNetBIOSOverTCPIPDatagramDistributionServer(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionNetBIOSOverTCPIPDatagramDistributionServer, o)
 }
 
-// RFC 1533, Section 8.9.
+// RFC 2132, Section 8.9.
 func GetXWindowSystemFontServer(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionXWindowSystemFontServer, o)
 }
 
-// RFC 1533, Section 8.10.
+// RFC 2132, Section 8.10.
 func GetXWindowSystemDisplayManager(o dhcp4.Options) (IPs, error) {
 	return GetIPs(dhcp4.OptionXWindowSystemDisplayManager, o)
 }
@@ -251,27 +254,27 @@ func GetString(code dhcp4.OptionCode, o dhcp4.Options) (string, error) {
 	return string(s), (&s).UnmarshalBinary(v)
 }
 
-// RFC 1533, Section 3.14.
+// RFC 2132, Section 3.14.
 func GetHostName(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionHostName, o)
 }
 
-// RFC 1533, Section 3.16.
+// RFC 2132, Section 3.16.
 func GetMeritDumpFile(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionMeritDumpFile, o)
 }
 
-// RFC 1533, Section 3.17.
+// RFC 2132, Section 3.17.
 func GetDomainName(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionDomainName, o)
 }
 
-// RFC 1533, Section 3.19.
+// RFC 2132, Section 3.19.
 func GetRootPath(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionRootPath, o)
 }
 
-// RFC 1533, Section 3.20.
+// RFC 2132, Section 3.20.
 func GetExtensionsPath(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionExtensionsPath, o)
 }
@@ -293,4 +296,14 @@ func (o *OptionCodes) UnmarshalBinary(p []byte) error {
 		*o = append(*o, dhcp4.OptionCode(b.Read8()))
 	}
 	return nil
+}
+
+// RFC 2132, Section 9.8.
+func GetParameterRequestList(o dhcp4.Options) (OptionCodes, error) {
+	v, err := o.Get(dhcp4.OptionParameterRequestList)
+	if err != nil {
+		return nil, err
+	}
+	var oc OptionCodes
+	return oc, (&oc).UnmarshalBinary(v)
 }

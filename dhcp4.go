@@ -1,3 +1,5 @@
+// Package dhcp4 implements constants and marshaling for DHCPv4 packets as
+// described by RFC 2131, RFC 2132, and RFC 3396.
 package dhcp4
 
 import (

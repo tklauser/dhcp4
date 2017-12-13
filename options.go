@@ -15,8 +15,8 @@ import (
 // packet. Get should be used to access data from Options.
 type Options map[OptionCode][]byte
 
-// Add adds a new OptionCode key and BinaryMarshaler struct's bytes to the
-// Options map.
+// Add adds a new OptionCode key and BinaryMarshaler's bytes to the Options
+// map.
 func (o Options) Add(key OptionCode, value encoding.BinaryMarshaler) error {
 	if value == nil {
 		o.AddRaw(key, []byte{})
@@ -61,8 +61,8 @@ func (o Options) Get(key OptionCode) ([]byte, error) {
 // input byte slice.
 //
 // It is used with various different types to enable parsing of both top-level
-// options, and options embedded within other options. If options data is
-// malformed, it returns ErrInvalidOptions.
+// options. If options data is malformed, it returns ErrInvalidOptions or
+// io.ErrUnexpectedEOF.
 func (o *Options) Unmarshal(buf *util.Buffer) error {
 	*o = make(Options)
 
