@@ -9,7 +9,19 @@ import (
 
 const (
 	minPacketLen = 236
-	MAClen       = 16
+
+	// Maximum length of the CHAddr (client hardware address) according to
+	// RFC 2131, Section 2. This is the link-layer destination a server
+	// must send responses to.
+	chaddrLen = 16
+)
+
+var (
+	magicCookie = []byte{99, 130, 83, 99}
+)
+
+const (
+	flagBroadcast = 1 << 15
 )
 
 // Packet is a DHCPv4 packet as described in RFC 2131 Section 2.
@@ -43,11 +55,9 @@ type Packet struct {
 
 func NewPacket(op OpCode) *Packet {
 	return &Packet{
-		Op:    op,
-		HType: 1, /* ethernet */
-		Options: Options{
-			End: []byte{},
-		},
+		Op:      op,
+		HType:   1, /* ethernet */
+		Options: make(Options),
 	}
 }
 
@@ -64,6 +74,7 @@ func (p *Packet) MarshalBinary() ([]byte, error) {
 	b := util.NewBuffer(make([]byte, 0, minPacketLen))
 	b.Write8(uint8(p.Op))
 	b.Write8(p.HType)
+
 	// HLen
 	b.Write8(uint8(len(p.CHAddr)))
 	b.Write8(p.Hops)
@@ -72,7 +83,7 @@ func (p *Packet) MarshalBinary() ([]byte, error) {
 
 	var flags uint16
 	if p.Broadcast {
-		flags |= 1 << 15
+		flags |= flagBroadcast
 	}
 	b.Write16(flags)
 
@@ -80,7 +91,7 @@ func (p *Packet) MarshalBinary() ([]byte, error) {
 	p.writeIP(b, p.YIAddr)
 	p.writeIP(b, p.SIAddr)
 	p.writeIP(b, p.GIAddr)
-	b.WriteBytes(p.CHAddr)
+	copy(b.WriteN(chaddrLen), p.CHAddr)
 
 	var sname [64]byte
 	copy(sname[:], []byte(p.ServerName))
@@ -93,7 +104,7 @@ func (p *Packet) MarshalBinary() ([]byte, error) {
 	b.WriteBytes(file[:])
 
 	// The magic cookie.
-	b.WriteBytes([]byte{99, 130, 83, 99})
+	b.WriteBytes(magicCookie)
 
 	p.Options.Marshal(b)
 	// TODO pad to 272 bytes for really old crap.
@@ -114,7 +125,7 @@ func (p *Packet) UnmarshalBinary(q []byte) error {
 	p.Secs = b.Read16()
 
 	flags := b.Read16()
-	if flags&1<<15 != 0 {
+	if flags&flagBroadcast != 0 {
 		p.Broadcast = true
 	}
 
@@ -127,11 +138,12 @@ func (p *Packet) UnmarshalBinary(q []byte) error {
 	p.GIAddr = make(net.IP, net.IPv4len)
 	b.ReadBytes(p.GIAddr)
 
-	if hlen > MAClen {
-		hlen = MAClen
+	if hlen > chaddrLen {
+		hlen = chaddrLen
 	}
-	p.CHAddr = make(net.HardwareAddr, hlen)
+	p.CHAddr = make(net.HardwareAddr, chaddrLen)
 	b.ReadBytes(p.CHAddr)
+	p.CHAddr = p.CHAddr[:hlen]
 
 	var sname [64]byte
 	b.ReadBytes(sname[:])

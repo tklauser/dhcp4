@@ -2,17 +2,11 @@ package dhcp4
 
 import (
 	"encoding"
+	"io"
 	"math"
 	"sort"
 
 	"github.com/u-root/dhcp4/util"
-)
-
-var (
-	zeroLengthOptions = map[OptionCode]struct{}{
-		Pad: {},
-		End: {},
-	}
 )
 
 // Options is a map of OptionCode keys with a slice of byte values.
@@ -72,34 +66,47 @@ func (o Options) Get(key OptionCode) ([]byte, error) {
 func (o *Options) Unmarshal(buf *util.Buffer) error {
 	*o = make(Options)
 
-	for buf.Len() >= 2 {
+	var end bool
+	for buf.Len() >= 1 {
 		// 1 byte: option code
 		// 1 byte: option length n
 		// n bytes: data
 		code := OptionCode(buf.Read8())
 
-		if _, ok := zeroLengthOptions[code]; ok {
-			o.AddRaw(code, []byte{})
+		if code == Pad {
 			continue
+		} else if code == End {
+			end = true
+			break
+		}
+		if !buf.Has(1) {
+			return io.ErrUnexpectedEOF
 		}
 
-		length := buf.Read8()
+		length := int(buf.Read8())
 		if length == 0 {
 			continue
 		}
 
-		// N bytes: option data
-		data := buf.Consume(int(length))
-		if data == nil {
-			return ErrInvalidOptions
+		if !buf.Has(length) {
+			return io.ErrUnexpectedEOF
 		}
-		data = data[:int(length):int(length)]
+
+		// N bytes: option data
+		data := buf.Consume(length)
+		if data == nil {
+			return io.ErrUnexpectedEOF
+		}
+		data = data[:length:length]
 
 		// RFC 3396: Just concatenate the data if the option code was
 		// specified multiple times.
 		o.AddRaw(code, data)
 	}
 
+	if !end {
+		return io.ErrUnexpectedEOF
+	}
 	// Report error for any trailing bytes
 	if buf.Len() != 0 {
 		return ErrInvalidOptions
@@ -109,18 +116,19 @@ func (o *Options) Unmarshal(buf *util.Buffer) error {
 
 // Marshal writes options into the provided Buffer sorted by option codes.
 func (o Options) Marshal(b *util.Buffer) {
-	for _, code := range o.sortedKeys() {
-		data := o[OptionCode(code)]
+	for _, c := range o.sortedKeys() {
+		code := OptionCode(c)
+		data := o[code]
 
 		// RFC 3396: If more than 256 bytes of data are given, the
 		// option is simply listed multiple times.
-		for len(data) >= 0 {
+		for len(data) > 0 {
 			// 1 byte: option code
 			b.Write8(uint8(code))
 
 			// Some DHCPv4 options have fixed length and do not put
 			// length on the wire.
-			if _, ok := zeroLengthOptions[OptionCode(code)]; ok {
+			if code == End || code == Pad {
 				continue
 			}
 
@@ -136,6 +144,11 @@ func (o Options) Marshal(b *util.Buffer) {
 			b.WriteBytes(data[:n])
 			data = data[n:]
 		}
+	}
+
+	// If "End" option is not in map, marshal it manually.
+	if _, ok := o[End]; !ok {
+		b.Write8(uint8(End))
 	}
 }
 
