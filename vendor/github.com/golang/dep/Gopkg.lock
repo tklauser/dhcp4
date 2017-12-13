@@ -11,14 +11,14 @@
 [[projects]]
   name = "github.com/Masterminds/vcs"
   packages = ["."]
-  revision = "6f1c6d150500e452704e9863f68c2559f58616bf"
-  version = "v1.12.0"
+  revision = "3084677c2c188840777bff30054f2b553729d329"
+  version = "v1.11.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/armon/go-radix"
   packages = ["."]
-  revision = "1fca145dffbcaa8fe914309b1ec0cfc67500fe61"
+  revision = "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2"
 
 [[projects]]
   name = "github.com/boltdb/bolt"
@@ -27,34 +27,16 @@
   version = "v1.3.1"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/d2g/dhcp4"
-  packages = ["."]
-  revision = "a1d1b6c41b1ce8a71a5121a9cee31809c4707d9c"
-
-[[projects]]
   branch = "v2"
   name = "github.com/go-yaml/yaml"
   packages = ["."]
-  revision = "287cf08546ab5e7e37d55a84f7ed3fd1db036de5"
-
-[[projects]]
-  name = "github.com/golang/dep"
-  packages = [".","cmd/dep","internal/feedback","internal/fs","internal/gps","internal/gps/internal/pb","internal/gps/paths","internal/gps/pkgtree","internal/importers","internal/importers/base","internal/importers/glide","internal/importers/godep","internal/importers/govend","internal/importers/gvt","internal/importers/vndr"]
-  revision = "8ddfc8afb2d520d41997ebddd921b52152706c01"
-  version = "v0.3.2"
+  revision = "cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b"
 
 [[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/google/netstack"
-  packages = ["ilist","tcpip","tcpip/buffer","tcpip/header","waiter"]
-  revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
+  revision = "5afd06f9d81a86d6e3bb7dc702d6bd148ea3ff23"
 
 [[projects]]
   name = "github.com/jmank88/nuts"
@@ -66,13 +48,19 @@
   branch = "master"
   name = "github.com/nightlyone/lockfile"
   packages = ["."]
-  revision = "6a197d5ea61168f2ac821de2b7f011b250904900"
+  revision = "e83dc5e7bba095e8d32fb2124714bf41f2a30cb5"
+
+[[projects]]
+  name = "github.com/pelletier/go-buffruneio"
+  packages = ["."]
+  revision = "c37440a7cf42ac63b919c752ca73a85067e05992"
+  version = "v0.2.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
-  revision = "4e9e0ee19b60b13eb79915933f44d8ed5f268bdd"
+  revision = "fe206efb84b2bc8e8cfafe6b4c1826622be969e3"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -90,23 +78,23 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
+  revision = "66aacef3dd8a676686c7ae3716979581e8b03c47"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sync"
   packages = ["errgroup"]
-  revision = "fd80eb99c8f653c847d294a001bdf2a3a6f768f5"
+  revision = "f52d1811a62927559de87708c8913c1650ce4f26"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "53aa286056ef226755cd898109dbcdaba8ac0b81"
+  revision = "bb24a47a89eac6c1227fbcb2ae37a8b9ed323366"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cb48a02d95f09d89b309e4334a39038d0fdac36025603a69ee03036f3ff90dbc"
+  inputs-digest = "05c1cd69be2c917c0cc4b32942830c2acfa044d8200fdc94716aae48a8083702"
   solver-name = "gps-cdcl"
   solver-version = 1
