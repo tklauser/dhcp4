@@ -7,9 +7,21 @@
   packages = ["."]
   revision = "a1d1b6c41b1ce8a71a5121a9cee31809c4707d9c"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/google/netstack"
+  packages = ["ilist","tcpip","tcpip/buffer","tcpip/header","waiter"]
+  revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "53aa286056ef226755cd898109dbcdaba8ac0b81"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9be722f2ba709d5024b29c582115d7f807ebb2fa9dc3178ed6cbdf873887face"
+  inputs-digest = "c6adec0dd57b88bc6f86cf63040b4d5bb84e2b66cb4ab3643378cea62201beac"
   solver-name = "gps-cdcl"
   solver-version = 1
