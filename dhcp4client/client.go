@@ -5,7 +5,6 @@
 package dhcp4client
 
 import (
-	"bytes"
 	"math/rand"
 	"net"
 	"time"
@@ -16,19 +15,29 @@ import (
 
 const (
 	maxMessageSize = 1500
+
+	ClientPort = 68
+	ServerPort = 67
 )
 
-// Client is a simple DHCPv4 client.
+var (
+	AllDHCPServers = &net.UDPAddr{
+		IP:   net.IPv4bcast,
+		Port: ServerPort,
+	}
+)
+
+// Client is a simple IPv4 DHCP client.
 type Client struct {
 	hardwareAddr net.HardwareAddr
+	conn         net.PacketConn
 	timeout      time.Duration
-	conn         *packetSock
 }
 
-// New creates a new DHCPv4 client that sends and receives packets on the given
+// New creates a new DHCP client that sends and receives packets on the given
 // interface.
 func New(link *net.Interface) (*Client, error) {
-	conn, err := newPacketSock(link.Index)
+	conn, err := NewIPv4UDPConn(link.Name, ClientPort)
 	if err != nil {
 		return nil, err
 	}
@@ -77,19 +86,19 @@ func (c *Client) SendAndRead(packet *dhcp4.Packet) (*dhcp4.Packet, error) {
 	for {
 		// TODO: We should have an overall timeout for the SendAndRead
 		// operation, not one for just the socket read.
-		c.conn.SetReadTimeout(c.timeout)
+		c.conn.SetReadDeadline(time.Now().Add(c.timeout))
 		p := make([]byte, maxMessageSize)
-		n, _, err := c.conn.Read(p)
+		n, _, err := c.conn.ReadFrom(p)
 		if err != nil {
 			return nil, err
 		}
 
-		resp := new(dhcp4.Packet)
+		resp := &dhcp4.Packet{}
 		if err := resp.UnmarshalBinary(p[:n]); err != nil {
 			return nil, err
 		}
 
-		if !bytes.Equal(packet.TransactionID[:], resp.TransactionID[:]) {
+		if packet.TransactionID != resp.TransactionID {
 			continue
 		}
 		return resp, nil
@@ -103,7 +112,8 @@ func (c *Client) SendPacket(packet *dhcp4.Packet) error {
 	if err != nil {
 		return err
 	}
-	return c.conn.Write(p)
+	_, err = c.conn.WriteTo(p, AllDHCPServers)
+	return err
 }
 
 func (c *Client) discoverPacket() *dhcp4.Packet {
