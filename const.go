@@ -10,6 +10,7 @@ const (
 	BootReply   OpCode = 2
 )
 
+// OptionCode is a DHCP option code as defined by RFC 2132.
 type OptionCode uint8
 
 // Option codes defined by RFC 2132. (Incomplete)

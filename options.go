@@ -155,8 +155,8 @@ func (o Options) Marshal(b *util.Buffer) {
 	}
 }
 
-// enumerate returns an ordered slice of option data from the Options map,
-// for use with sending responses to clients.
+// sortedKeys returns an ordered slice of option keys from the Options map, for
+// use in serializing options to binary.
 func (o Options) sortedKeys() []int {
 	// Send all values for a given key
 	var codes []int
