@@ -1,8 +1,8 @@
-// Package client is a small, minimum-functionality client for DHCPv4.
+// Package dhcp4client is a small, minimum-functionality client for DHCPv4.
 //
 // It only supports the 4-way DHCPv4 Discover-Offer-Request-Ack handshake as
 // well as the Request-Ack renewal process.
-package client
+package dhcp4client
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/u-root/dhcp4"
-	"github.com/u-root/dhcp4/opts"
+	"github.com/u-root/dhcp4/dhcp4opts"
 )
 
 const (
@@ -112,8 +112,8 @@ func (c *Client) discoverPacket() *dhcp4.Packet {
 	packet.CHAddr = c.hardwareAddr
 	packet.Broadcast = true
 
-	packet.Options.Add(dhcp4.OptionDHCPMessageType, opts.DHCPDiscover)
-	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, opts.Uint16(maxMessageSize))
+	packet.Options.Add(dhcp4.OptionDHCPMessageType, dhcp4opts.DHCPDiscover)
+	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, dhcp4opts.Uint16(maxMessageSize))
 	return packet
 }
 
@@ -126,14 +126,14 @@ func (c *Client) requestPacket(reply *dhcp4.Packet) *dhcp4.Packet {
 	packet.SIAddr = reply.SIAddr
 	packet.Broadcast = true
 
-	packet.Options.Add(dhcp4.OptionDHCPMessageType, opts.DHCPRequest)
-	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, opts.Uint16(maxMessageSize))
+	packet.Options.Add(dhcp4.OptionDHCPMessageType, dhcp4opts.DHCPRequest)
+	packet.Options.Add(dhcp4.OptionMaximumDHCPMessageSize, dhcp4opts.Uint16(maxMessageSize))
 	// Request the offered IP address.
-	packet.Options.Add(dhcp4.OptionRequestedIPAddress, opts.IP(reply.YIAddr))
+	packet.Options.Add(dhcp4.OptionRequestedIPAddress, dhcp4opts.IP(reply.YIAddr))
 
-	sid, err := opts.GetServerIdentifier(reply.Options)
+	sid, err := dhcp4opts.GetServerIdentifier(reply.Options)
 	if err == nil {
-		packet.Options.Add(dhcp4.OptionServerIdentifier, opts.IP(sid))
+		packet.Options.Add(dhcp4.OptionServerIdentifier, dhcp4opts.IP(sid))
 	}
 	return packet
 }

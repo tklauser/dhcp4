@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/u-root/dhcp4/util"
+	"github.com/u-root/dhcp4/internal/buffer"
 )
 
 const (
@@ -88,7 +88,7 @@ func NewPacket(op OpCode) *Packet {
 	}
 }
 
-func writeIP(b *util.Buffer, ip net.IP) {
+func writeIP(b *buffer.Buffer, ip net.IP) {
 	var zeros [net.IPv4len]byte
 	if ip == nil {
 		b.WriteBytes(zeros[:])
@@ -99,7 +99,7 @@ func writeIP(b *util.Buffer, ip net.IP) {
 
 // MarshalBinary writes the packet to binary.
 func (p *Packet) MarshalBinary() ([]byte, error) {
-	b := util.NewBuffer(make([]byte, 0, minPacketLen))
+	b := buffer.New(make([]byte, 0, minPacketLen))
 	b.Write8(uint8(p.Op))
 	b.Write8(p.HType)
 
@@ -141,7 +141,7 @@ func (p *Packet) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary reads the packet from binary.
 func (p *Packet) UnmarshalBinary(q []byte) error {
-	b := util.NewBuffer(q)
+	b := buffer.New(q)
 	if b.Len() < minPacketLen {
 		return ErrInvalidPacket
 	}

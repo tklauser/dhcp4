@@ -1,11 +1,11 @@
-package opts
+package dhcp4opts
 
 import (
 	"io"
 	"net"
 
 	"github.com/u-root/dhcp4"
-	"github.com/u-root/dhcp4/util"
+	"github.com/u-root/dhcp4/internal/buffer"
 )
 
 // DHCPMessageType implements encoding.BinaryMarshaler and encapsulates binary
@@ -99,7 +99,7 @@ type IPs []net.IP
 
 // MarshalBinary writes the list of IPs to binary.
 func (i IPs) MarshalBinary() ([]byte, error) {
-	b := util.NewBuffer(make([]byte, 0, net.IPv4len*len(i)))
+	b := buffer.New(make([]byte, 0, net.IPv4len*len(i)))
 	for _, ip := range i {
 		b.WriteBytes(ip.To4())
 	}
@@ -108,7 +108,7 @@ func (i IPs) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary reads a list of IPs from binary.
 func (i *IPs) UnmarshalBinary(p []byte) error {
-	b := util.NewBuffer(p)
+	b := buffer.New(p)
 	if b.Len() == 0 || b.Len()%net.IPv4len != 0 {
 		return io.ErrUnexpectedEOF
 	}
@@ -166,7 +166,7 @@ type OptionCodes []dhcp4.OptionCode
 
 // MarshalBinary writes the option code list to binary.
 func (o OptionCodes) MarshalBinary() ([]byte, error) {
-	b := util.NewBuffer(nil)
+	b := buffer.New(nil)
 	for _, code := range o {
 		b.Write8(uint8(code))
 	}
@@ -175,7 +175,7 @@ func (o OptionCodes) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary reads the option code list from binary.
 func (o *OptionCodes) UnmarshalBinary(p []byte) error {
-	b := util.NewBuffer(p)
+	b := buffer.New(p)
 	*o = make(OptionCodes, 0, b.Len())
 	for b.Len() > 0 {
 		*o = append(*o, dhcp4.OptionCode(b.Read8()))
@@ -189,14 +189,14 @@ type Uint16 uint16
 
 // MarshalBinary writes the uint16 to binary.
 func (u Uint16) MarshalBinary() ([]byte, error) {
-	b := util.NewBuffer(nil)
+	b := buffer.New(nil)
 	b.Write16(uint16(u))
 	return b.Data(), nil
 }
 
 // UnmarshalBinary reads the uint16 from binary.
 func (u *Uint16) UnmarshalBinary(p []byte) error {
-	b := util.NewBuffer(p)
+	b := buffer.New(p)
 	if b.Len() < 2 {
 		return io.ErrUnexpectedEOF
 	}

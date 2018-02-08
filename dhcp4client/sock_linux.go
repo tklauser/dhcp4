@@ -1,4 +1,4 @@
-package client
+package dhcp4client
 
 import (
 	"net"

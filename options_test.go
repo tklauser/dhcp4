@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/u-root/dhcp4/util"
+	"github.com/u-root/dhcp4/internal/buffer"
 )
 
 func TestOptionsMarshal(t *testing.T) {
@@ -54,7 +54,7 @@ func TestOptionsMarshal(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("Test %02d", i), func(t *testing.T) {
-			b := util.NewBuffer(nil)
+			b := buffer.New(nil)
 			tt.opts.Marshal(b)
 			if !bytes.Equal(b.Data(), tt.want) {
 				t.Errorf("got %v want %v", b.Data(), tt.want)
@@ -148,7 +148,7 @@ func TestOptionsUnmarshal(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("Test %02d", i), func(t *testing.T) {
 			var got Options
-			if err := (&got).Unmarshal(util.NewBuffer(tt.input)); err != tt.err {
+			if err := (&got).Unmarshal(buffer.New(tt.input)); err != tt.err {
 				t.Fatalf("got %v want %v", err, tt.err)
 			} else if err != nil {
 				return

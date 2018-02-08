@@ -1,7 +1,7 @@
-// opts implements Options parsing for DHCPv4 options as described in RFC 2132.
+// Package dhcp4opts implements Options parsing for DHCPv4 options as described in RFC 2132.
 //
 // Not all options are currently implemented.
-package opts
+package dhcp4opts
 
 import (
 	"github.com/u-root/dhcp4"
