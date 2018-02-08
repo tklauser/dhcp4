@@ -120,7 +120,7 @@ func GetRootPath(o dhcp4.Options) (string, error) {
 	return GetString(dhcp4.OptionRootPath, o)
 }
 
-// GetExtensionPath returns the extension path name in `o`.
+// GetExtensionsPath returns the extension path name in `o`.
 //
 // The extension path option is defined by RFC 2132, Section 3.20.
 func GetExtensionsPath(o dhcp4.Options) (string, error) {
