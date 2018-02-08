@@ -3,31 +3,36 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - dep
+      - vet
       - test:
           requires:
-            - dep
+            - vet
       - compile:
           requires:
-            - dep
+            - vet
 jobs:
-  dep:
+  vet:
     docker:
       - image: circleci/golang:latest
     working_directory: /go/src/github.com/u-root/dhcp4
     steps:
       - checkout
       - run:
-          name: Install dep
-          command: |
-            cd vendor/github.com/golang/dep/cmd/dep
-            go install
-      - run:
           name: Check vendored dependencies
-          command: dep status
+          command: |
+            go get -u github.com/golang/dep/cmd/dep
+            dep status
       - run:
           name: go vet
           command: go tool vet `find -name \*.go | grep -v ^./vendor`
+      - run:
+          name: golint
+          command: |
+            go get -u github.com/golang/lint/golint
+            golint ./
+            golint ./dhcp4opts/...
+            golint ./dhcp4client/...
+            golint ./internal/...
   test:
     docker:
       - image: circleci/golang:latest

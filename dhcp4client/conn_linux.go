@@ -7,6 +7,8 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+// NewIPv4UDPConn returns a UDP connection bound to both the interface and port
+// given. The UDP connection allows broadcasting.
 func NewIPv4UDPConn(iface string, port int) (net.PacketConn, error) {
 	fd, err := unix.Socket(unix.AF_INET, unix.SOCK_DGRAM, unix.IPPROTO_UDP)
 	if err != nil {

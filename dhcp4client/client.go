@@ -16,11 +16,16 @@ import (
 const (
 	maxMessageSize = 1500
 
+	// ClientPort is the port that DHCP clients listen on.
 	ClientPort = 68
+
+	// ServerPort is the port that DHCP servers and relay agents listen on.
 	ServerPort = 67
 )
 
 var (
+	// AllDHCPServers is the address of all link-local DHCP servers and
+	// relay agents.
 	AllDHCPServers = &net.UDPAddr{
 		IP:   net.IPv4bcast,
 		Port: ServerPort,
