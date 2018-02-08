@@ -51,12 +51,6 @@
   revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/google/netstack"
-  packages = ["ilist","tcpip","tcpip/buffer","tcpip/header","waiter"]
-  revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
-
-[[projects]]
   name = "github.com/jmank88/nuts"
   packages = ["."]
   revision = "a1e02c788669d022c325a8ee674f15360d7104f4"
@@ -107,6 +101,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cb48a02d95f09d89b309e4334a39038d0fdac36025603a69ee03036f3ff90dbc"
+  inputs-digest = "7e089917d90f9d18c6158b0a24e681befb2af5908479e3c96b55a80197e91a52"
   solver-name = "gps-cdcl"
   solver-version = 1
