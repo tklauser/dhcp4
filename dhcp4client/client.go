@@ -103,9 +103,31 @@ func WithConn(conn net.PacketConn) ClientOpt {
 	}
 }
 
+// DiscoverOffer sends a DHCPDiscover message and returns the first valid offer
+// received.
+func (c *Client) DiscoverOffer() (*dhcp4.Packet, error) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, c.DiscoverPacket())
+
+	for packet := range out {
+		msgType, err := dhcp4opts.GetDHCPMessageType(packet.Packet.Options)
+		if err == nil && msgType == dhcp4opts.DHCPACK {
+			// Deferred cancel will cancel the goroutine.
+			return packet.Packet, nil
+		}
+	}
+
+	if err, ok := <-errCh; ok && err != nil {
+		return nil, err
+	}
+	return nil, fmt.Errorf("didn't get a packet")
+}
+
 // Request completes the 4-way Discover-Offer-Request-Ack handshake.
 func (c *Client) Request() (*dhcp4.Packet, error) {
-	offer, err := c.SendAndReadOne(c.DiscoverPacket())
+	offer, err := c.DiscoverOffer()
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +154,7 @@ func (c *Client) SendAndReadOne(packet *dhcp4.Packet) (*dhcp4.Packet, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	out, errCh := c.SendAndRead(ctx, DefaultServers, packet)
+	out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, packet)
 
 	response, ok := <-out
 	if ok {
@@ -166,7 +188,7 @@ func (c *Client) RequestPacket(offer *dhcp4.Packet) *dhcp4.Packet {
 	packet := dhcp4.NewPacket(dhcp4.BootRequest)
 
 	packet.CHAddr = c.iface.Attrs().HardwareAddr
-	packet.TransactionID = reply.TransactionID
+	packet.TransactionID = offer.TransactionID
 	packet.CIAddr = offer.CIAddr
 	packet.SIAddr = offer.SIAddr
 	packet.Broadcast = true
@@ -213,7 +235,7 @@ func (c *Client) newClientErr(err error) *ClientError {
 	}
 }
 
-// SendAndRead broadcasts a DHCP packet and launches a goroutine to read
+// SimpleSendAndRead broadcasts a DHCP packet and launches a goroutine to read
 // response packets. Those response packets will be sent on the channel
 // returned.
 //
@@ -222,11 +244,9 @@ func (c *Client) newClientErr(err error) *ClientError {
 // More importantly, if you send another packet, the spawned goroutine may read
 // the response faster than the one launched for the other packet.
 //
-// See Client.Solicit for an example use of SendAndRead.
-//
 // Callers sending a packet on one interface should use this. Callers intending
 // to send packets on many interface at the same time should look at using
-// ParallelSendAndRead instead.
+// SendAndRead instead.
 //
 // Example Usage:
 //
@@ -234,7 +254,7 @@ func (c *Client) newClientErr(err error) *ClientError {
 //     ctx, cancel := context.WithCancel(context.Background())
 //     defer cancel()
 //
-//     out, errCh := c.SendAndRead(ctx, DefaultServers, someRequest)
+//     out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, someRequest)
 //
 //     for response := range out {
 //       if response == What You Want {
@@ -252,32 +272,30 @@ func (c *Client) newClientErr(err error) *ClientError {
 // TODO(hugelgupf): since the client only has one connection, maybe it should
 // just have one dedicated goroutine for reading from the UDP socket, and use a
 // request and response queue.
-func (c *Client) SendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet) (<-chan *ClientPacket, <-chan *ClientError) {
+func (c *Client) SimpleSendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet) (<-chan *ClientPacket, <-chan *ClientError) {
 	out := make(chan *ClientPacket, 10)
 	errOut := make(chan *ClientError, 1)
-	go c.ParallelSendAndRead(ctx, dest, p, out, errOut)
+	go func() {
+		c.SendAndRead(ctx, dest, p, out, errOut)
+		close(out)
+		close(errOut)
+	}()
 	return out, errOut
 }
 
-// ParallelSendAndRead sends the given packet `dest` to `to` and reads
-// responses on the UDP connection. Valid responses are sent to `out`; `out` is
-// closed by SendAndRead when it returns.
+// SendAndRead sends the given packet `p` to `dest` and reads responses on the
+// UDP connection. Any valid DHCP reply packet is sent to `out`.
 //
-// ParallelSendAndRead blocks reading response packets until either:
+// SendAndRead blocks reading response packets until either:
 // - `ctx` is canceled; or
 // - we have exhausted all configured retries and timeouts.
-//
-// Any valid DHCP packet received with the correct Transaction ID is sent on
-// `out`.
 //
 // SendAndRead retries sending the packet and receiving responses according to
 // the configured number of c.retry, using a response timeout of c.timeout.
 //
 // TODO(hugelgupf): Make this a little state machine of packet types. See RFC
 // 2131, Section 4.4, Figure 5.
-func (c *Client) ParallelSendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet, out chan<- *ClientPacket, errCh chan<- *ClientError) {
-	defer close(errCh)
-
+func (c *Client) SendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet, out chan<- *ClientPacket, errCh chan<- *ClientError) {
 	// This ensures that
 	// - we send at most one error on errCh; and
 	// - we don't forget to send err on errCh in the many return statements
@@ -288,8 +306,6 @@ func (c *Client) ParallelSendAndRead(ctx context.Context, dest *net.UDPAddr, p *
 }
 
 func (c *Client) sendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet, out chan<- *ClientPacket) *ClientError {
-	defer close(out)
-
 	pkt, err := p.MarshalBinary()
 	if err != nil {
 		return c.newClientErr(err)
