@@ -9,6 +9,30 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/google/netstack"
+  packages = [
+    "ilist",
+    "tcpip",
+    "tcpip/buffer",
+    "tcpip/header",
+    "waiter"
+  ]
+  revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mdlayher/ethernet"
+  packages = ["."]
+  revision = "e72cf8343052938936194daba1914fd1bb33d2fe"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mdlayher/raw"
+  packages = ["."]
+  revision = "c83864e487652c25edc58048eafdc1dfa2f142c7"
+
+[[projects]]
+  branch = "master"
   name = "github.com/vishvananda/netlink"
   packages = [
     ".",
@@ -24,6 +48,12 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/net"
+  packages = ["bpf"]
+  revision = "22ae77b79946ea320088417e4d50825671d82d57"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "37707fdb30a5b38865cfb95e5aab41707daec7fd"
@@ -31,6 +61,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ed1229c366185ce9acf41dba3335502b0970c344ecbb08c8b458ce9eab35d32b"
+  inputs-digest = "3a9171223e25212ef68bd5ddc07e8a4d63999a68074f878a0db4337be69d8a80"
   solver-name = "gps-cdcl"
   solver-version = 1
