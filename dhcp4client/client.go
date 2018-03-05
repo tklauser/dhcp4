@@ -113,7 +113,7 @@ func (c *Client) DiscoverOffer() (*dhcp4.Packet, error) {
 
 	for packet := range out {
 		msgType, err := dhcp4opts.GetDHCPMessageType(packet.Packet.Options)
-		if err == nil && msgType == dhcp4opts.DHCPACK {
+		if err == nil && msgType == dhcp4opts.DHCPOffer {
 			// Deferred cancel will cancel the goroutine.
 			return packet.Packet, nil
 		}
