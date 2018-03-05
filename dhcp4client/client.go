@@ -60,7 +60,7 @@ func New(iface netlink.Link, opts ...ClientOpt) (*Client, error) {
 
 	if c.conn == nil {
 		var err error
-		c.conn, err = NewIPv4UDPConn(iface.Attrs().Name, ClientPort)
+		c.conn, err = NewPacketUDPConn(iface.Attrs().Name, ClientPort)
 		if err != nil {
 			return nil, err
 		}
