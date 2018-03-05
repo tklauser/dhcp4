@@ -156,15 +156,14 @@ func (c *Client) SendAndReadOne(packet *dhcp4.Packet) (*dhcp4.Packet, error) {
 
 	out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, packet)
 
-	response, ok := <-out
-	if ok {
+	if response, ok := <-out; ok {
 		// We're just gonna take the first packet.
-		cancel()
+		return response.Packet, nil
 	}
 	if err, ok := <-errCh; ok && err != nil {
 		return nil, err
 	}
-	return response.Packet, nil
+	return nil, fmt.Errorf("no packet received")
 }
 
 // DiscoverPacket returns a valid Discover packet for this client.
