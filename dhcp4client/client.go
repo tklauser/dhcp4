@@ -1,3 +1,7 @@
+// Copyright 2018 the u-root Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package dhcp4client is a small, minimum-functionality client for DHCPv4.
 //
 // It only supports the 4-way DHCPv4 Discover-Offer-Request-Ack handshake as
