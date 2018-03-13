@@ -136,12 +136,7 @@ type server struct {
 
 func (s *server) serve(ctx context.Context) {
 	go func() {
-		for {
-			// We're done.
-			if len(s.responses) == 0 {
-				break
-			}
-
+		for len(s.responses) > 0 {
 			select {
 			case udpPkt, ok := <-s.in:
 				if !ok {
@@ -443,7 +438,7 @@ func TestSimpleSendAndReadDiscardGarbageTimeout(t *testing.T) {
 	}
 }
 
-func TestSimpleSendAndReadMultiple(t *testing.T) {
+func TestMultipleSendAndReadOne(t *testing.T) {
 	for _, tt := range []struct {
 		desc    string
 		send    []*dhcp4.Packet
@@ -451,7 +446,7 @@ func TestSimpleSendAndReadMultiple(t *testing.T) {
 		wantErr []error
 	}{
 		{
-			desc: "two response packets",
+			desc: "two requests, two responses",
 			send: []*dhcp4.Packet{
 				newPacket(dhcp4.BootRequest, [4]byte{0x33, 0x33, 0x33, 0x33}),
 				newPacket(dhcp4.BootRequest, [4]byte{0x44, 0x44, 0x44, 0x44}),
