@@ -112,10 +112,12 @@ func WithConn(conn net.PacketConn) ClientOpt {
 // received.
 func (c *Client) DiscoverOffer() (*dhcp4.Packet, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	wg, out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, c.DiscoverPacket())
-	defer wg.Wait()
+	defer func() {
+		// Explicitly cancel first, then wait.
+		cancel()
+		wg.Wait()
+	}()
 
 	for packet := range out {
 		msgType, err := dhcp4opts.GetDHCPMessageType(packet.Packet.Options)
@@ -158,10 +160,12 @@ func (c *Client) Close() error {
 // any server.
 func (c *Client) SendAndReadOne(packet *dhcp4.Packet) (*dhcp4.Packet, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	wg, out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, packet)
-	defer wg.Wait()
+	defer func() {
+		// Explicitly cancel first, then wait.
+		cancel()
+		wg.Wait()
+	}()
 
 	if response, ok := <-out; ok {
 		// We're just gonna take the first packet.

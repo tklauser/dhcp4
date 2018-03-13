@@ -478,22 +478,12 @@ func TestSimpleSendAndReadMultiple(t *testing.T) {
 		defer mc.conn.Close()
 
 		for i, send := range tt.send {
-			wg, out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, send)
+			rcvd, err := mc.SendAndReadOne(send)
 
-			var rcvd []*dhcp4.Packet
-			for packet := range out {
-				rcvd = append(rcvd, packet.Packet)
+			if wantErr := tt.wantErr[i]; err != wantErr {
+				t.Errorf("SendAndReadOne(%v): got %v, want %v", send, err, wantErr)
 			}
-
-			wantErr := tt.wantErr[i]
-			if err, ok := <-errCh; ok && err.Err != wantErr {
-				t.Errorf("SimpleSendAndRead(%v): got %v, want %v", send, err.Err, wantErr)
-			} else if !ok && wantErr != nil {
-				t.Errorf("didn't get error, want %v", wantErr)
-			}
-
-			wg.Wait()
-			if err := pktsExpected(rcvd, tt.server[i]); err != nil {
+			if err := pktsExpected([]*dhcp4.Packet{rcvd}, tt.server[i]); err != nil {
 				t.Errorf("got unexpected packets: %v", err)
 			}
 		}
