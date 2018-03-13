@@ -136,37 +136,44 @@ type server struct {
 
 func (s *server) serve(ctx context.Context) {
 	go func() {
-		select {
-		case udpPkt, ok := <-s.in:
-			if !ok {
+		for {
+			// We're done.
+			if len(s.responses) == 0 {
 				break
 			}
 
-			// What did we get?
-			var pkt dhcp4.Packet
-			if err := (&pkt).UnmarshalBinary(udpPkt.payload); err != nil {
-				panic(fmt.Sprintf("invalid dhcp6 packet %q: %v", udpPkt.payload, err))
-			}
-			s.received = append(s.received, &pkt)
-
-			if len(s.responses) > 0 {
-				resps := s.responses[0]
-				// What should we send in response?
-				for _, resp := range resps {
-					bin, err := resp.MarshalBinary()
-					if err != nil {
-						panic(fmt.Sprintf("failed to serialize dhcp6 packet %v: %v", resp, err))
-					}
-					s.out <- udpPacket{
-						source:  udpPkt.dest,
-						payload: bin,
-					}
+			select {
+			case udpPkt, ok := <-s.in:
+				if !ok {
+					break
 				}
-				s.responses = s.responses[1:]
-			}
 
-		case <-ctx.Done():
-			break
+				// What did we get?
+				var pkt dhcp4.Packet
+				if err := (&pkt).UnmarshalBinary(udpPkt.payload); err != nil {
+					panic(fmt.Sprintf("invalid dhcp6 packet %q: %v", udpPkt.payload, err))
+				}
+				s.received = append(s.received, &pkt)
+
+				if len(s.responses) > 0 {
+					resps := s.responses[0]
+					// What should we send in response?
+					for _, resp := range resps {
+						bin, err := resp.MarshalBinary()
+						if err != nil {
+							panic(fmt.Sprintf("failed to serialize dhcp6 packet %v: %v", resp, err))
+						}
+						s.out <- udpPacket{
+							source:  udpPkt.dest,
+							payload: bin,
+						}
+					}
+					s.responses = s.responses[1:]
+				}
+
+			case <-ctx.Done():
+				break
+			}
 		}
 
 		// We're done sending stuff.
@@ -310,7 +317,7 @@ func TestSimpleSendAndRead(t *testing.T) {
 		if err, ok := <-errCh; ok && err.Err != tt.wantErr {
 			t.Errorf("SimpleSendAndRead(%v): got %v, want %v", tt.send, err.Err, tt.wantErr)
 		} else if !ok && tt.wantErr != nil {
-			t.Errorf("got no error, want %v", tt.wantErr)
+			t.Errorf("didn't get error, want %v", tt.wantErr)
 		}
 
 		wg.Wait()
@@ -433,5 +440,62 @@ func TestSimpleSendAndReadDiscardGarbageTimeout(t *testing.T) {
 	}
 	if counter != 0 {
 		t.Errorf("should not have received a valid packet, counter is %d", counter)
+	}
+}
+
+func TestSimpleSendAndReadMultiple(t *testing.T) {
+	for _, tt := range []struct {
+		desc    string
+		send    []*dhcp4.Packet
+		server  [][]*dhcp4.Packet
+		wantErr []error
+	}{
+		{
+			desc: "two response packets",
+			send: []*dhcp4.Packet{
+				newPacket(dhcp4.BootRequest, [4]byte{0x33, 0x33, 0x33, 0x33}),
+				newPacket(dhcp4.BootRequest, [4]byte{0x44, 0x44, 0x44, 0x44}),
+			},
+			server: [][]*dhcp4.Packet{
+				[]*dhcp4.Packet{ // Response for first packet.
+					newPacket(dhcp4.BootReply, [4]byte{0x33, 0x33, 0x33, 0x33}),
+				},
+				[]*dhcp4.Packet{ // Response for second packet.
+					newPacket(dhcp4.BootReply, [4]byte{0x44, 0x44, 0x44, 0x44}),
+				},
+			},
+			wantErr: []error{
+				nil,
+				nil,
+			},
+		},
+	} {
+		// Both server and client only get 2 seconds.
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		mc, _ := serveAndClient(ctx, tt.server)
+		defer mc.conn.Close()
+
+		for i, send := range tt.send {
+			wg, out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, send)
+
+			var rcvd []*dhcp4.Packet
+			for packet := range out {
+				rcvd = append(rcvd, packet.Packet)
+			}
+
+			wantErr := tt.wantErr[i]
+			if err, ok := <-errCh; ok && err.Err != wantErr {
+				t.Errorf("SimpleSendAndRead(%v): got %v, want %v", send, err.Err, wantErr)
+			} else if !ok && wantErr != nil {
+				t.Errorf("didn't get error, want %v", wantErr)
+			}
+
+			wg.Wait()
+			if err := pktsExpected(rcvd, tt.server[i]); err != nil {
+				t.Errorf("got unexpected packets: %v", err)
+			}
+		}
 	}
 }
