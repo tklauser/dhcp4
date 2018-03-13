@@ -300,7 +300,7 @@ func TestSimpleSendAndRead(t *testing.T) {
 		mc, _ := serveAndClient(ctx, [][]*dhcp4.Packet{tt.server})
 		defer mc.conn.Close()
 
-		out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, tt.send)
+		wg, out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, tt.send)
 
 		var rcvd []*dhcp4.Packet
 		for packet := range out {
@@ -313,6 +313,7 @@ func TestSimpleSendAndRead(t *testing.T) {
 			t.Errorf("got no error, want %v", tt.wantErr)
 		}
 
+		wg.Wait()
 		want := tt.want
 		if want == nil {
 			want = tt.server
@@ -340,7 +341,7 @@ func TestSimpleSendAndReadHandleCancel(t *testing.T) {
 	mc, udpConn := serveAndClient(ctx, [][]*dhcp4.Packet{responses})
 	defer mc.conn.Close()
 
-	out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, pkt)
+	wg, out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, pkt)
 
 	var counter int
 	for range out {
@@ -350,6 +351,7 @@ func TestSimpleSendAndReadHandleCancel(t *testing.T) {
 		}
 	}
 
+	wg.Wait()
 	if err, ok := <-errCh; ok {
 		t.Errorf("got %v, want nil error", err)
 	}
@@ -385,7 +387,7 @@ func TestSimpleSendAndReadDiscardGarbage(t *testing.T) {
 		payload: []byte{0x01}, // Too short for valid DHCPv4 packet.
 	}
 
-	out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, pkt)
+	wg, out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, pkt)
 
 	var i int
 	for recvd := range out {
@@ -395,6 +397,7 @@ func TestSimpleSendAndReadDiscardGarbage(t *testing.T) {
 		i++
 	}
 
+	wg.Wait()
 	if err, ok := <-errCh; ok {
 		t.Errorf("SimpleSendAndRead(%v): got %v %v, want %v", pkt, ok, err, nil)
 	}
@@ -417,13 +420,14 @@ func TestSimpleSendAndReadDiscardGarbageTimeout(t *testing.T) {
 		payload: []byte{0x01}, // Too short for valid DHCPv6 packet.
 	}
 
-	out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, pkt)
+	wg, out, errCh := mc.SimpleSendAndRead(ctx, DefaultServers, pkt)
 
 	var counter int
 	for range out {
 		counter++
 	}
 
+	wg.Wait()
 	if err, ok := <-errCh; !ok || err == nil || err.Err != context.DeadlineExceeded {
 		t.Errorf("SimpleSendAndRead(%v): got %v %v, want %v", pkt, ok, err, context.DeadlineExceeded)
 	}

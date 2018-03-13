@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/u-root/dhcp4"
@@ -113,7 +114,8 @@ func (c *Client) DiscoverOffer() (*dhcp4.Packet, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, c.DiscoverPacket())
+	wg, out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, c.DiscoverPacket())
+	defer wg.Wait()
 
 	for packet := range out {
 		msgType, err := dhcp4opts.GetDHCPMessageType(packet.Packet.Options)
@@ -158,7 +160,8 @@ func (c *Client) SendAndReadOne(packet *dhcp4.Packet) (*dhcp4.Packet, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, packet)
+	wg, out, errCh := c.SimpleSendAndRead(ctx, DefaultServers, packet)
+	defer wg.Wait()
 
 	if response, ok := <-out; ok {
 		// We're just gonna take the first packet.
@@ -275,15 +278,18 @@ func (c *Client) newClientErr(err error) *ClientError {
 // TODO(hugelgupf): since the client only has one connection, maybe it should
 // just have one dedicated goroutine for reading from the UDP socket, and use a
 // request and response queue.
-func (c *Client) SimpleSendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet) (<-chan *ClientPacket, <-chan *ClientError) {
+func (c *Client) SimpleSendAndRead(ctx context.Context, dest *net.UDPAddr, p *dhcp4.Packet) (*sync.WaitGroup, <-chan *ClientPacket, <-chan *ClientError) {
 	out := make(chan *ClientPacket, 10)
 	errOut := make(chan *ClientError, 1)
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
 		c.SendAndRead(ctx, dest, p, out, errOut)
 		close(out)
 		close(errOut)
+		wg.Done()
 	}()
-	return out, errOut
+	return &wg, out, errOut
 }
 
 // SendAndRead sends the given packet `p` to `dest` and reads responses on the
