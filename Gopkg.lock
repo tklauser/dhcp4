@@ -3,12 +3,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/d2g/dhcp4"
-  packages = ["."]
-  revision = "a1d1b6c41b1ce8a71a5121a9cee31809c4707d9c"
-
-[[projects]]
-  branch = "master"
   name = "github.com/google/netstack"
   packages = [
     "ilist",
@@ -18,6 +12,15 @@
     "waiter"
   ]
   revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/krolaw/dhcp4"
+  packages = [
+    ".",
+    "conn"
+  ]
+  revision = "4abfceffa76a675ea43d133e49aad64c821d32bf"
 
 [[projects]]
   branch = "master"
@@ -49,7 +52,12 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["bpf"]
+  packages = [
+    "bpf",
+    "internal/iana",
+    "internal/socket",
+    "ipv4"
+  ]
   revision = "d0aafc73d5cdc42264b0af071c261abac580695e"
 
 [[projects]]
@@ -61,6 +69,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3a9171223e25212ef68bd5ddc07e8a4d63999a68074f878a0db4337be69d8a80"
+  inputs-digest = "df219d26b717ec689170c5099b379b22aef89ea438cc86629bfa56e2cc7f7fbf"
   solver-name = "gps-cdcl"
   solver-version = 1

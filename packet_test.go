@@ -11,7 +11,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/d2g/dhcp4"
+	"github.com/krolaw/dhcp4"
 )
 
 func TestPacketMarshalBinary(t *testing.T) {

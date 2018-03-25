@@ -1,7 +1,3 @@
-[[constraint]]
-  branch = "master"
-  name = "github.com/d2g/dhcp4"
-
 [prune]
   non-go = true
   go-tests = true
