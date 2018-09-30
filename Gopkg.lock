@@ -3,72 +3,96 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:9d006ed2e6d57af598667ff0b142a9c420fd3e1bb9bf64a22c412d03db6ff29e"
   name = "github.com/google/netstack"
   packages = [
     "ilist",
     "tcpip",
     "tcpip/buffer",
     "tcpip/header",
-    "waiter"
+    "waiter",
   ]
+  pruneopts = "NUT"
   revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
 
 [[projects]]
   branch = "master"
+  digest = "1:9412e2ac6cd9de79b0d52b56434a89c9a475f257de399c9362bd5d0f75316553"
   name = "github.com/krolaw/dhcp4"
   packages = [
     ".",
-    "conn"
+    "conn",
   ]
+  pruneopts = "NUT"
   revision = "4abfceffa76a675ea43d133e49aad64c821d32bf"
 
 [[projects]]
   branch = "master"
+  digest = "1:88810ec115324c260951440d11f030e4bfe451cd888720481e1ddc037a5c8678"
   name = "github.com/mdlayher/ethernet"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "e72cf8343052938936194daba1914fd1bb33d2fe"
 
 [[projects]]
   branch = "master"
+  digest = "1:98639a82d367844001cab7be902b876ce8cfab34d5571fbb14a76c703b0a0ae0"
   name = "github.com/mdlayher/raw"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "5f27d82a512f55b8668d40c0343d2f53885261fa"
 
 [[projects]]
   branch = "master"
+  digest = "1:936ab0fd3f16edc83131e626594a4f4e75426e5adeb7adbe57ed203db4c1b950"
   name = "github.com/vishvananda/netlink"
   packages = [
     ".",
-    "nl"
+    "nl",
   ]
+  pruneopts = "NUT"
   revision = "5236321576c0c97ab02c078e60f9b1c5c1828807"
 
 [[projects]]
   branch = "master"
+  digest = "1:cfa9b2092e9b5f46feaa6c0d7a957618cd74d26cb2a72e3638f3ead773b23854"
   name = "github.com/vishvananda/netns"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "be1fbeda19366dea804f00efff2dd73a1642fdcc"
 
 [[projects]]
   branch = "master"
+  digest = "1:360b153e589c836867c1b8e6cdf4b78f5ef52e9a407e7fa93ef9e14cf96551e0"
   name = "golang.org/x/net"
   packages = [
     "bpf",
     "internal/iana",
     "internal/socket",
-    "ipv4"
+    "ipv4",
   ]
+  pruneopts = "NUT"
   revision = "d0aafc73d5cdc42264b0af071c261abac580695e"
 
 [[projects]]
   branch = "master"
+  digest = "1:7abf37b0e817a83279a2cf75a0d1b9b6d55e2e6b12c0895960aa76f1e53dcd77"
   name = "golang.org/x/sys"
   packages = ["unix"]
+  pruneopts = "NUT"
   revision = "7dca6fe1f43775aa6d1334576870ff63f978f539"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "df219d26b717ec689170c5099b379b22aef89ea438cc86629bfa56e2cc7f7fbf"
+  input-imports = [
+    "github.com/google/netstack/tcpip",
+    "github.com/google/netstack/tcpip/header",
+    "github.com/krolaw/dhcp4",
+    "github.com/mdlayher/ethernet",
+    "github.com/mdlayher/raw",
+    "github.com/vishvananda/netlink",
+    "golang.org/x/sys/unix",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
