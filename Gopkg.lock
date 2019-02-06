@@ -29,6 +29,17 @@
   revision = "5f27d82a512f55b8668d40c0343d2f53885261fa"
 
 [[projects]]
+  digest = "1:c1bb3f437a292d3448b0d2d0a82da9a13786bb3e97f266e6fd10c2f455d7c4ec"
+  name = "github.com/u-root/u-root"
+  packages = [
+    "pkg/ubinary",
+    "pkg/uio",
+  ]
+  pruneopts = "NUT"
+  revision = "8b001e68c2bf8d45ccfe2818f324acbea9321c5b"
+  version = "v4.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:936ab0fd3f16edc83131e626594a4f4e75426e5adeb7adbe57ed203db4c1b950"
   name = "github.com/vishvananda/netlink"
@@ -75,6 +86,7 @@
     "github.com/krolaw/dhcp4",
     "github.com/mdlayher/ethernet",
     "github.com/mdlayher/raw",
+    "github.com/u-root/u-root/pkg/uio",
     "github.com/vishvananda/netlink",
     "golang.org/x/sys/unix",
   ]
