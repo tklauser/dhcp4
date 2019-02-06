@@ -11,7 +11,7 @@ import (
 
 	"github.com/mdlayher/ethernet"
 	"github.com/mdlayher/raw"
-	"github.com/u-root/dhcp4/internal/buffer"
+	"github.com/u-root/u-root/pkg/uio"
 	"golang.org/x/sys/unix"
 )
 
@@ -111,7 +111,7 @@ func (upc *UDPPacketConn) ReadFrom(b []byte) (int, net.Addr, error) {
 			return 0, nil, err
 		}
 		pkt = pkt[:n]
-		buf := buffer.New(pkt)
+		buf := uio.NewBigEndianBuffer(pkt)
 
 		// To read the header length, access data directly.
 		ipHdr := IPv4(buf.Data())
@@ -129,7 +129,7 @@ func (upc *UDPPacketConn) ReadFrom(b []byte) (int, net.Addr, error) {
 		if !udpMatch(addr, upc.boundAddr) {
 			continue
 		}
-		return copy(b, buf.Remaining()), addr, nil
+		return copy(b, buf.ReadAll()), addr, nil
 	}
 }
 
