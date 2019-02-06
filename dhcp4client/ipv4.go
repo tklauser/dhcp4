@@ -18,7 +18,7 @@ import (
 	"encoding/binary"
 	"net"
 
-	"github.com/u-root/dhcp4/internal/buffer"
+	"github.com/u-root/u-root/pkg/uio"
 )
 
 const (
@@ -427,7 +427,7 @@ func udp4pkt(packet []byte, dest *net.UDPAddr, src *net.UDPAddr) []byte {
 	udpLen := UDPMinimumSize
 
 	h := make([]byte, 0, ipLen+udpLen+len(packet))
-	hdr := buffer.New(h)
+	hdr := uio.NewBigEndianBuffer(h)
 
 	ipv4fields := &IPv4Fields{
 		IHL:         IPv4MinimumSize,
