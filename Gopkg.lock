@@ -3,20 +3,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9d006ed2e6d57af598667ff0b142a9c420fd3e1bb9bf64a22c412d03db6ff29e"
-  name = "github.com/google/netstack"
-  packages = [
-    "ilist",
-    "tcpip",
-    "tcpip/buffer",
-    "tcpip/header",
-    "waiter",
-  ]
-  pruneopts = "NUT"
-  revision = "edcfca33ca347f59a1393986a5d216a5f183ae28"
-
-[[projects]]
-  branch = "master"
   digest = "1:9412e2ac6cd9de79b0d52b56434a89c9a475f257de399c9362bd5d0f75316553"
   name = "github.com/krolaw/dhcp4"
   packages = [
@@ -86,8 +72,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/google/netstack/tcpip",
-    "github.com/google/netstack/tcpip/header",
     "github.com/krolaw/dhcp4",
     "github.com/mdlayher/ethernet",
     "github.com/mdlayher/raw",
