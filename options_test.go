@@ -34,6 +34,34 @@ func TestOptionsMarshal(t *testing.T) {
 			},
 		},
 		{
+			opts: Options{
+				0: []byte{},
+			},
+			want: []byte{0, 255},
+		},
+		{
+			opts: Options{
+				255: []byte{},
+			},
+			want: []byte{255},
+		},
+		{
+			opts: Options{
+				255: []byte{1, 2, 3, 4},
+			},
+			want: []byte{255},
+		},
+		{
+			opts: Options{
+				5:   []byte{3, 2, 1},
+				255: []byte{},
+			},
+			want: []byte{
+				5, 3, 3, 2, 1,
+				255,
+			},
+		},
+		{
 			// Test sorted key order.
 			opts: Options{
 				5:   []byte{1, 2, 3},

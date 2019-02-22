@@ -125,19 +125,19 @@ func (o *Options) Unmarshal(buf *uio.Lexer) error {
 func (o Options) Marshal(b *uio.Lexer) {
 	for _, c := range o.sortedKeys() {
 		code := OptionCode(c)
-		data := o[code]
+		// Some DHCPv4 options have fixed length and do not put
+		// length on the wire.
+		if code == End || code == Pad {
+			b.Write8(uint8(code))
+			continue
+		}
 
 		// RFC 3396: If more than 256 bytes of data are given, the
 		// option is simply listed multiple times.
+		data := o[code]
 		for len(data) > 0 {
 			// 1 byte: option code
 			b.Write8(uint8(code))
-
-			// Some DHCPv4 options have fixed length and do not put
-			// length on the wire.
-			if code == End || code == Pad {
-				continue
-			}
 
 			n := len(data)
 			if n > math.MaxUint8 {
